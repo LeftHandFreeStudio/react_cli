@@ -1,0 +1,17 @@
+import React, { Component } from 'react';
+import './(component_name).css';
+
+class (component_name) extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {};
+  }
+
+  render() {
+    return (<p>(component_name) works!</p>
+    );
+  }
+}
+
+export default (component_name);
