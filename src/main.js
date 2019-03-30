@@ -58,7 +58,6 @@ function ensureDirectoryExistence(filePath) {
 
 function createRequiredFiles(pathToCreate) {
   const pathElements = pathToCreate.split(path.sep);
-  console.log(pathElements);
 
   const componentName = pathElements[pathElements.length - 1];
   const templatesData = [];
