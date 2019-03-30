@@ -1,6 +1,6 @@
 {
   "name": "cli-rct",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "React library for generating new components",
   "main": "src/main.js",
   "keywords": [

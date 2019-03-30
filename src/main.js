@@ -77,13 +77,13 @@ function createRequiredFiles(pathToCreate) {
         process.cwd()
       );
 
-      fs.writeFile(startingPath + path.sep + fileName, dataToWrite, function(
-        err
-      ) {
+      let pathToFile = startingPath + path.sep + fileName;
+
+      fs.writeFile(pathToFile, dataToWrite, function(err) {
         if (err) {
           return console.log(err);
         }
-        console.log(fileName + ' created!');
+        console.log(pathToFile + ' created!');
       });
     }
   };
@@ -109,10 +109,6 @@ function createRequiredFiles(pathToCreate) {
 }
 
 function createPathToFileFromArray(pathArray, startingDir) {
-  console.log('Path array');
-
-  console.log(pathArray);
-  console.log(startingDir);
   if (pathArray.length === 0) {
     return startingDir;
   }
