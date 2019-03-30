@@ -1,5 +1,5 @@
 {
-  "name": "rct",
+  "name": "cli-rct",
   "version": "1.0.0",
   "description": "React library for generating new components",
   "main": "src/main.js",
@@ -17,7 +17,7 @@
     "url": "https://github.com/LeftHandFreeStudio/react_cli"
   },
   "bin": {
-    "rcmp": "./src/main.js"
+    "rct": "./src/main.js"
   },
   "author": "Maciej Kawka",
   "license": "MIT"
