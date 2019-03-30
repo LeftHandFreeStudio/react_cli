@@ -7,7 +7,7 @@ const config = require('./config').config;
 
 const commandArguments = process.argv.slice(2);
 
-const executionPath = process.cwd();
+const executionPath = process.cwd() + path.sep + 'src';
 
 checkForGenerateCommand();
 
@@ -39,10 +39,7 @@ function validateComponentName() {
 }
 
 function createDirectories(pathElements) {
-  let newComponentPath = path.join(process.cwd(), pathElements[0]);
-  for (let k = 1; k < pathElements.length; k++) {
-    newComponentPath = path.join(newComponentPath, pathElements[k]);
-  }
+  let newComponentPath = createPathToFileFromArray(pathElements, executionPath);
   ensureDirectoryExistence(newComponentPath);
   createRequiredFiles(newComponentPath);
 }
@@ -63,7 +60,7 @@ function createRequiredFiles(pathToCreate) {
   const templatesData = [];
   let counter = 0;
 
-  const readDataCallback = function() {
+  const readDataCallback = function () {
     for (let k = 0; k < config.build.length; k++) {
       let template = config.build[k];
       let dataToWrite = templatesData[k];
@@ -73,12 +70,12 @@ function createRequiredFiles(pathToCreate) {
       userPathElements.splice(userPathElements.length - 1, 1);
       const startingPath = createPathToFileFromArray(
         userPathElements,
-        process.cwd()
+        executionPath
       );
 
       let pathToFile = startingPath + path.sep + fileName;
 
-      fs.writeFile(pathToFile, dataToWrite, function(err) {
+      fs.writeFile(pathToFile, dataToWrite, function (err) {
         if (err) {
           return console.log(err);
         }
@@ -87,7 +84,7 @@ function createRequiredFiles(pathToCreate) {
     }
   };
 
-  const counterCallback = function() {
+  const counterCallback = function () {
     counter++;
     if (counter === config.build.length) {
       readDataCallback();
@@ -117,10 +114,4 @@ function createPathToFileFromArray(pathArray, startingDir) {
     pathToReturn = path.join(pathToReturn, pathArray[k]);
   }
   return pathToReturn;
-}
-
-function applyReplacements(replacements, dataToReplace) {
-  for (let k = 0; k < replacements.length; k++) {
-    let replacement = replacements[k];
-  }
 }
