@@ -11,4 +11,5 @@ It's configurable!
 ```rct g path/to/new/component```
 
 Generates file based on configuration from config.js.
-Last part of the path is always the component name. First letter will be uppercased if nescessary.
+Last part of the path is always the component name. First letter will be uppercased if necessary.
+By default basic component will be generated along with simple test file and empty CSS sheet.
