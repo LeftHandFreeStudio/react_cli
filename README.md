@@ -5,9 +5,11 @@ Command inspired by Angular 'ng generate component'.
 
 It's configurable!
 
-#Install
+# Install
+
 ```npm install -g cli-rct```
-#Use
+# Use
+
 ```rct g path/to/new/component```
 
 Generates file based on configuration from config.js.
