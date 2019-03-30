@@ -32,11 +32,6 @@ function validateComponentName() {
   if (pathElements.length == 0) {
     console.log('invalid component name');
     process.exit();
-  } else if (pathElements.length == 1) {
-    console.log('single component name');
-    componentName =
-      commandArguments[1].charAt(0).toUpperCase() +
-      commandArguments[1].slice(1);
   } else {
     console.log('creating directories');
     createDirectories(pathElements);
@@ -114,6 +109,14 @@ function createRequiredFiles(pathToCreate) {
 }
 
 function createPathToFileFromArray(pathArray, startingDir) {
+  console.log('Path array');
+
+  console.log(pathArray);
+  console.log(startingDir);
+  if (pathArray.length === 0) {
+    return startingDir;
+  }
+
   let pathToReturn = path.join(startingDir, pathArray[0]);
   for (let k = 1; k < pathArray.length; k++) {
     pathToReturn = path.join(pathToReturn, pathArray[k]);
