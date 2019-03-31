@@ -5,6 +5,19 @@ Command inspired by Angular 'ng generate component'.
 
 It's configurable!
 
+Edit src/config.js in order to define your own generated files like so:
+"build":[ <template_object>, <template_object>, <template_object> ]
+
+Each <template_object> has following structure:
+
+```
+{
+    "description" : "Description of template", // optional description field.
+    "templatePath" : "path/to/template", // path to a txt file containing file content.
+    "extension" : :".example" // extension that will be added to generated file.
+}
+```
+
 # Install
 
 ```npm install -g cli-rct```
