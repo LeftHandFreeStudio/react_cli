@@ -13,6 +13,7 @@ Command inspired by Angular 'ng generate component'.
 
 Last part of the path is always the component name. First letter will be uppercased if necessary.
 By default basic component will be generated along with simple test file and empty CSS sheet.
+It also replaces all occurances of '(component_name)' in templates with the component name from path.
 
 It's also configurable!
 
