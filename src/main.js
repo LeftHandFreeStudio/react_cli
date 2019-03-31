@@ -1,8 +1,7 @@
 #! /usr/bin/env node
-const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const r = require('./readTemplates');
+const fsu = require('./fileSystemUtils');
 const config = require('./config').config;
 
 const commandArguments = process.argv.slice(2);
@@ -13,7 +12,7 @@ checkForGenerateCommand();
 
 function checkForGenerateCommand() {
   if (commandArguments[0] === 'g' || commandArguments[0] === 'generate') {
-    console.log('generating component');
+    console.log('Generating required templates...');
     executeGenerateCommand();
   } else {
     console.log('invalid command ' + "'" + commandArguments[0] + " '");
@@ -28,29 +27,18 @@ function executeGenerateCommand() {
 function validateComponentName() {
   const componentPath = commandArguments[1];
   const pathElements = componentPath.split('/');
-  let componentName = '';
   if (pathElements.length == 0) {
     console.log('invalid component name');
     process.exit();
   } else {
-    console.log('creating directories');
     createDirectories(pathElements);
   }
 }
 
 function createDirectories(pathElements) {
-  let newComponentPath = createPathToFileFromArray(pathElements, executionPath);
-  ensureDirectoryExistence(newComponentPath);
+  let newComponentPath = addElementsToDirPath(pathElements, executionPath);
+  fsu.createNecessaryFoldersForPath(newComponentPath);
   createRequiredFiles(newComponentPath);
-}
-
-function ensureDirectoryExistence(filePath) {
-  var dirname = path.dirname(filePath);
-  if (fs.existsSync(dirname)) {
-    return true;
-  }
-  ensureDirectoryExistence(dirname);
-  fs.mkdirSync(dirname);
 }
 
 function createRequiredFiles(pathToCreate) {
@@ -60,7 +48,7 @@ function createRequiredFiles(pathToCreate) {
   const templatesData = [];
   let counter = 0;
 
-  const readDataCallback = function () {
+  const templatesDataFetchedCb = function () {
     for (let k = 0; k < config.build.length; k++) {
       let template = config.build[k];
       let dataToWrite = templatesData[k];
@@ -68,50 +56,45 @@ function createRequiredFiles(pathToCreate) {
       let fileName = componentName + template.extension;
       let userPathElements = commandArguments[1].split('/');
       userPathElements.splice(userPathElements.length - 1, 1);
-      const startingPath = createPathToFileFromArray(
+      const startingPath = addElementsToDirPath(
         userPathElements,
         executionPath
       );
 
       let pathToFile = startingPath + path.sep + fileName;
 
-      fs.writeFile(pathToFile, dataToWrite, function (err) {
-        if (err) {
-          return console.log(err);
-        }
-        console.log(pathToFile + ' created!');
-      });
+      fsu.saveToFile(dataToWrite, pathToFile);
     }
   };
 
   const counterCallback = function () {
     counter++;
     if (counter === config.build.length) {
-      readDataCallback();
+      templatesDataFetchedCb();
     }
   };
 
   for (let k = 0; k < config.build.length; k++) {
     let templatePath = config.build[k].templatePath;
-    templatePath = createPathToFileFromArray(
+    templatePath = addElementsToDirPath(
       templatePath.split('/'),
       __dirname
     );
-    r.readTemplate(templatePath).then(data => {
+    fsu.readTemplate(templatePath).then(data => {
       templatesData[k] = data;
       counterCallback();
     });
   }
 }
 
-function createPathToFileFromArray(pathArray, startingDir) {
-  if (pathArray.length === 0) {
+function addElementsToDirPath(elementsArray, startingDir) {
+  if (elementsArray.length === 0) {
     return startingDir;
   }
 
-  let pathToReturn = path.join(startingDir, pathArray[0]);
-  for (let k = 1; k < pathArray.length; k++) {
-    pathToReturn = path.join(pathToReturn, pathArray[k]);
+  let pathToReturn = path.join(startingDir, elementsArray[0]);
+  for (let k = 1; k < elementsArray.length; k++) {
+    pathToReturn = path.join(pathToReturn, elementsArray[k]);
   }
   return pathToReturn;
 }
