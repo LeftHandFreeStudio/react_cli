@@ -2,7 +2,15 @@
 const fs = require('fs');
 const path = require('path');
 const fsu = require('./fileSystemUtils');
-const config = require('./config').config;
+let config = require('./config').config;
+let isCustomConfig = false;
+try {
+  config = require(process.cwd() + path.sep + 'cli_config.json');
+  isCustomConfig = true;
+} catch (e) {
+
+}
+
 
 const commandArguments = process.argv.slice(2);
 
@@ -32,18 +40,16 @@ function validateComponentName() {
     process.exit();
   } else {
     createDirectories(pathElements);
+    createRequiredFiles(pathElements);
   }
 }
 
 function createDirectories(pathElements) {
   let newComponentPath = addElementsToDirPath(pathElements, executionPath);
   fsu.createNecessaryFoldersForPath(newComponentPath);
-  createRequiredFiles(newComponentPath);
 }
 
-function createRequiredFiles(pathToCreate) {
-  const pathElements = pathToCreate.split(path.sep);
-
+function createRequiredFiles(pathElements) {
   const componentName = pathElements[pathElements.length - 1];
   const templatesData = [];
   let counter = 0;
@@ -73,16 +79,24 @@ function createRequiredFiles(pathToCreate) {
       templatesDataFetchedCb();
     }
   };
+  readTemplatesData(templatesData, counterCallback);
+}
+
+function readTemplatesData(target, cb) {
+  let startingDir = __dirname;
+  if (isCustomConfig) {
+    startingDir = process.cwd();
+  }
 
   for (let k = 0; k < config.build.length; k++) {
     let templatePath = config.build[k].templatePath;
     templatePath = addElementsToDirPath(
       templatePath.split('/'),
-      __dirname
+      startingDir
     );
     fsu.readTemplate(templatePath).then(data => {
-      templatesData[k] = data;
-      counterCallback();
+      target[k] = data;
+      cb();
     });
   }
 }
