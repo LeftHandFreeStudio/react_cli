@@ -7,6 +7,7 @@ let isCustomConfig = false;
 try {
   config = require(process.cwd() + path.sep + 'cli_config.json');
   isCustomConfig = true;
+  console.log('Using custom config from cli_config.json.');
 } catch (e) {}
 
 const commandArguments = process.argv.slice(2);
@@ -62,7 +63,17 @@ function createDirectories(pathElements) {
 
 function createRequiredFiles(pathElements, buildType) {
   const componentName = pathElements[pathElements.length - 1];
-  const templates = buildType ? config[buildType] : config.defaultBuild;
+  const templates = buildType
+    ? config[buildType]
+    : config.defaultBuild
+    ? config.defaultBuild
+    : config.build;
+  if (!templates) {
+    console.log(
+      'No builds found. Try to use default one or check your cli_config.json.'
+    );
+    process.exit();
+  }
   const templatesData = [];
   let counter = 0;
 
