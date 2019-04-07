@@ -7,10 +7,7 @@ let isCustomConfig = false;
 try {
   config = require(process.cwd() + path.sep + 'cli_config.json');
   isCustomConfig = true;
-} catch (e) {
-
-}
-
+} catch (e) {}
 
 const commandArguments = process.argv.slice(2);
 
@@ -21,27 +18,41 @@ checkForGenerateCommand();
 function checkForGenerateCommand() {
   if (commandArguments[0] === 'g' || commandArguments[0] === 'generate') {
     console.log('Generating required templates...');
-    executeGenerateCommand();
+    let customBuild;
+    let componentPath = commandArguments[1];
+    if (commandArguments.length == 3) {
+      customBuild = commandArguments[1];
+      componentPath = commandArguments[2];
+      if (config.hasOwnProperty(customBuild)) {
+        console.log('Using build with name ' + customBuild);
+      } else {
+        console.log(
+          'Build with name ' + customBuild + 'not found. Using default.'
+        );
+        customBuild = undefined;
+      }
+    }
+    executeGenerateCommand(customBuild, componentPath);
   } else {
     console.log('invalid command ' + "'" + commandArguments[0] + " '");
     process.exit();
   }
 }
 
-function executeGenerateCommand() {
-  validateComponentName();
-}
-
-function validateComponentName() {
-  const componentPath = commandArguments[1];
-  const pathElements = componentPath.split('/');
-  if (pathElements.length == 0) {
+function executeGenerateCommand(buildType, componentPath) {
+  const pathLength = getTargetPathLength(componentPath);
+  if (pathLength == 0) {
     console.log('invalid component name');
     process.exit();
   } else {
-    createDirectories(pathElements);
-    createRequiredFiles(pathElements);
+    createDirectories(componentPath.split('/'));
+    createRequiredFiles(componentPath.split('/'), buildType);
   }
+}
+
+function getTargetPathLength(componentPath) {
+  const pathElements = componentPath.split('/');
+  return pathElements.length;
 }
 
 function createDirectories(pathElements) {
@@ -49,18 +60,19 @@ function createDirectories(pathElements) {
   fsu.createNecessaryFoldersForPath(newComponentPath);
 }
 
-function createRequiredFiles(pathElements) {
+function createRequiredFiles(pathElements, buildType) {
   const componentName = pathElements[pathElements.length - 1];
+  const templates = buildType ? config[buildType] : config.defaultBuild;
   const templatesData = [];
   let counter = 0;
 
-  const templatesDataFetchedCb = function () {
-    for (let k = 0; k < config.build.length; k++) {
-      let template = config.build[k];
+  const templatesDataFetchedCb = function() {
+    for (let k = 0; k < templates.length; k++) {
+      let template = templates[k];
       let dataToWrite = templatesData[k];
       dataToWrite = dataToWrite.replace(/\(component_name\)/g, componentName);
       let fileName = componentName + template.extension;
-      let userPathElements = commandArguments[1].split('/');
+      let userPathElements = JSON.parse(JSON.stringify(pathElements));
       userPathElements.splice(userPathElements.length - 1, 1);
       const startingPath = addElementsToDirPath(
         userPathElements,
@@ -73,27 +85,24 @@ function createRequiredFiles(pathElements) {
     }
   };
 
-  const counterCallback = function () {
+  const counterCallback = function() {
     counter++;
-    if (counter === config.build.length) {
+    if (counter === templates.length) {
       templatesDataFetchedCb();
     }
   };
-  readTemplatesData(templatesData, counterCallback);
+  readTemplatesData(templatesData, counterCallback, templates);
 }
 
-function readTemplatesData(target, cb) {
+function readTemplatesData(target, cb, templates) {
   let startingDir = __dirname;
   if (isCustomConfig) {
     startingDir = process.cwd();
   }
 
-  for (let k = 0; k < config.build.length; k++) {
-    let templatePath = config.build[k].templatePath;
-    templatePath = addElementsToDirPath(
-      templatePath.split('/'),
-      startingDir
-    );
+  for (let k = 0; k < templates.length; k++) {
+    let templatePath = templates[k].templatePath;
+    templatePath = addElementsToDirPath(templatePath.split('/'), startingDir);
     fsu.readTemplate(templatePath).then(data => {
       target[k] = data;
       cb();

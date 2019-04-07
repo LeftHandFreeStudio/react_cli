@@ -1,5 +1,5 @@
 module.exports.config = {
-  build: [
+  defaultBuild: [
     {
       description: 'Component template',
       templatePath: '../templates/default/defaultComponentTemplate.txt',
